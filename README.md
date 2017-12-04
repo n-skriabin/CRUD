@@ -1,4 +1,4 @@
-# CRUD
+# CRUD/ASP MVC/Kendo Grid
 CRUD operations on Kendo UI Grid. ASP MVC 5.
 
 Implemented basic CRUD functionality for working with the database
