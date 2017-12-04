@@ -19,7 +19,8 @@ namespace CRUD.Web.Controllers
 
         public ArticlesController()
         {
-            articlesService = new ArticlesService(WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name);
+            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name;
+            articlesService = new ArticlesService(connectionString);
         }
 
         public ActionResult Index()

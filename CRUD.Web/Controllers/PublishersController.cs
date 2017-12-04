@@ -18,7 +18,8 @@ namespace CRUD.Web.Controllers
 
         public PublishersController()
         {
-            publishersService = new PublishersService(WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name);
+            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name;
+            publishersService = new PublishersService(connectionString);
         }
 
         public ActionResult Index()

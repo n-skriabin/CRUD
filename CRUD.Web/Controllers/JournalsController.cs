@@ -18,7 +18,8 @@ namespace CRUD.Web.Controllers
 
         public JournalsController()
         {
-            journalsService = new JournalsService(WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name);
+            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name;
+            journalsService = new JournalsService(connectionString);
         }
 
         public ActionResult Index()

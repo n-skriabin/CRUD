@@ -19,7 +19,8 @@ namespace CRUD.Web.Controllers
 
         public AuthorsController()
         {
-            authorsService = new AuthorsService(WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name);
+            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name;
+            authorsService = new AuthorsService(connectionString);
         }
 
         public ActionResult Index()

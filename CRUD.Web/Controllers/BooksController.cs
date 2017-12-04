@@ -19,7 +19,8 @@ namespace CRUD.Web.Controllers
 
         public BooksController()
         {
-            booksService = new BooksService(WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name);
+            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name;
+            booksService = new BooksService(connectionString);
         }
 
         public ActionResult Index()
