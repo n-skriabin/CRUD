@@ -15,17 +15,13 @@ namespace CRUD.Services
     public class PublishersService
     {
         private IRepositoryBook _repositoryBook;
-        private IRepositoryAuthor _repositoryAuthor;
         private IRepositoryJournal _repositoryJournal;
-        private IRepositoryArticle _repositoryArticle;
         private IRepositoryPublisher _repositoryPublisher;
 
         public PublishersService(string ConnectionString)
         {
             _repositoryBook = new BookRepository(ConnectionString);
-            _repositoryAuthor = new AuthorRepository(ConnectionString);
             _repositoryJournal = new JournalRepository(ConnectionString);
-            _repositoryArticle = new ArticleRepository(ConnectionString);
             _repositoryPublisher = new PublisherRepository(ConnectionString);
         }
 
