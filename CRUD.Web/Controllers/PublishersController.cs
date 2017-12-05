@@ -24,7 +24,6 @@ namespace CRUD.Web.Controllers
 
         public ActionResult Index()
         {
-            ViewBag.Message = "Publishers";
             return View();
         }
 

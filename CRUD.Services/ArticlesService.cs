@@ -1,5 +1,4 @@
 ﻿using CRUD.DataAccess;
-using CRUD.DataAccess.Interfaces;
 using CRUD.DataAccess.Repositories;
 using CRUD.Domain;
 using CRUD.Views;
@@ -13,25 +12,27 @@ namespace CRUD.Services
 {
     public class ArticlesService
     {
-        private IRepositoryArticle _repositoryArticle;
-        private IRepositoryAuthor _repositoryAuthor;
+        private ArticleRepository _articleRepository;
+        private AuthorRepository _authorRepository;
 
         public ArticlesService(string ConnectionString)
         {
-            _repositoryArticle = new ArticleRepository(ConnectionString);
-            _repositoryAuthor = new AuthorRepository(ConnectionString);
+            _articleRepository = new ArticleRepository(ConnectionString);
+            _authorRepository = new AuthorRepository(ConnectionString);
         }
 
         public List<ArticleViewModel> Read()
         {
-            var articlesList = _repositoryArticle.Read();
+            var articlesList = _articleRepository.Read();
 
             List<ArticleViewModel> articlesForView = new List<ArticleViewModel>();
 
-            for (int i = 0; i < articlesList.Count; i++)
+            foreach(var article in articlesList)
             {
-                var author = _repositoryAuthor.GetAuthor(ToGuid(articlesList[i].AuthorId));
-                var articleViewModel = DomainToViewModel(articlesList[i], author.Abbreviated);
+                var guidId = ToGuid(article.AuthorId);
+                var author = _authorRepository.GetAuthor(guidId);
+                
+                var articleViewModel = DomainToViewModel(article, author.Abbreviated);
                 articlesForView.Add(articleViewModel);
             }
             return articlesForView;
@@ -40,27 +41,28 @@ namespace CRUD.Services
         public void Create(ArticleViewModel articleViewModel)
         {
             articleViewModel.Id = Guid.NewGuid();
-            articleViewModel.Abbreviated = _repositoryAuthor.GetAuthor(articleViewModel.AuthorId).Abbreviated;
+            articleViewModel.Abbreviated = _authorRepository.GetAuthor(articleViewModel.AuthorId).Abbreviated;
             var article = ViewModelToDomain(articleViewModel);
-            _repositoryArticle.Create(article);
+            _articleRepository.Create(article);
         }
 
         public void Update(ArticleViewModel articleViewModel)
         {
-            articleViewModel.Abbreviated = _repositoryAuthor.GetAuthor(articleViewModel.AuthorId).Abbreviated;
+            articleViewModel.Abbreviated = _authorRepository.GetAuthor(articleViewModel.AuthorId).Abbreviated;
             var article = ViewModelToDomain(articleViewModel);
-            _repositoryArticle.Update(article);
+            _articleRepository.Update(article);
         }
 
         public List<ArticleViewModel> GetArticlesForView()
         {
-            var articlesList = _repositoryArticle.Read();
+            var articlesList = _articleRepository.Read();
 
             List<ArticleViewModel> articlesForView = new List<ArticleViewModel>();
-            for (int i = 0; i < articlesList.Count; i++)
+            foreach (var article in articlesList)
             {
-                var author = _repositoryAuthor.GetAuthor(ToGuid(articlesList[i].AuthorId));
-                var articleViewModel = DomainToViewModel(articlesList[i], author.Abbreviated);
+                var guidId = ToGuid(article.AuthorId);
+                var author = _authorRepository.GetAuthor(guidId);
+                var articleViewModel = DomainToViewModel(article, author.Abbreviated);
                 articlesForView.Add(articleViewModel);
             }
             return articlesForView;
@@ -68,7 +70,7 @@ namespace CRUD.Services
 
         public void Delete(ArticleViewModel articleViewModel)
         {
-            _repositoryArticle.Delete(articleViewModel.Id);
+            _articleRepository.Delete(articleViewModel.Id);
         }
 
         public Guid ToGuid(Guid? source)

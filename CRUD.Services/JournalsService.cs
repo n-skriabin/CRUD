@@ -1,5 +1,4 @@
-﻿using CRUD.DataAccess.Interfaces;
-using CRUD.DataAccess.Repositories;
+﻿using CRUD.DataAccess.Repositories;
 using CRUD.Domain;
 using CRUD.Views;
 using Newtonsoft.Json;
@@ -13,39 +12,35 @@ namespace CRUD.Services
 {
     public class JournalsService
     {
-        private IRepositoryJournal _repositoryJournal;
-        private IRepositoryArticle _repositoryArticle;
-        private IRepositoryAuthor _repositoryAuthor;
+        private JournalRepository _journalRepository;
+        private ArticleRepository _articleRepository;
+        private AuthorRepository _authorRepository;
 
         public JournalsService(string ConnectionString)
         {
-            _repositoryJournal = new JournalRepository(ConnectionString);
-            _repositoryArticle = new ArticleRepository(ConnectionString);
-            _repositoryAuthor = new AuthorRepository(ConnectionString);
+            _journalRepository = new JournalRepository(ConnectionString);
+            _articleRepository = new ArticleRepository(ConnectionString);
+            _authorRepository = new AuthorRepository(ConnectionString);
         }
 
         public List<JournalViewModel> Read()
         {
-            var journals = _repositoryJournal.Read();         
+            var journals = _journalRepository.Read();         
 
             List<JournalViewModel> journalsListForViewModel = new List<JournalViewModel>();
-            for (int i = 0; i < journals.Count; i++)
+            foreach(var journal in journals)
             {
-                var articles = GetArticlesList(journals[i].Id);
+                var articles = GetArticlesList(journal.Id);
                 JournalViewModel journalViewModel = new JournalViewModel
                 {
-                    Id = journals[i].Id,
-                    Name = journals[i].Name,
-                    Date = journals[i].Date,
+                    Id = journal.Id,
+                    Name = journal.Name,
+                    Date = journal.Date,
+                    ArticlesList = articles,
                 };
-                if (articles != null)
-                {
-                    journalViewModel.ArticlesList = articles;
-                }
 
                 journalsListForViewModel.Add(journalViewModel);
             }
-
             return journalsListForViewModel;
         }
 
@@ -57,7 +52,7 @@ namespace CRUD.Services
             var journal = ViewModelToDomain(responseJournalViewModel);
             var journalViewModel = DomainToViewModel(responseJournalViewModel);
 
-            _repositoryJournal.Create(journal, articlesIdList);
+            _journalRepository.Create(journal, articlesIdList);
 
             return journalViewModel;
         }
@@ -67,19 +62,19 @@ namespace CRUD.Services
             var journal = ViewModelToDomain(responseJournalViewModel);
             var journalViewModel = DomainToViewModel(responseJournalViewModel);
 
-            _repositoryJournal.Update(journal, responseJournalViewModel.ArticlesList);
+            _journalRepository.Update(journal, responseJournalViewModel.ArticlesList);
 
             return journalViewModel;
         }
 
         public void Delete(JournalViewModel journalViewModel)
         {
-            _repositoryJournal.Delete(journalViewModel.Id);
+            _journalRepository.Delete(journalViewModel.Id);
         }
 
         public List<Article> GetArticlesList(Guid? JournalId)
         {
-            var allArticles = _repositoryArticle.Read();
+            var allArticles = _articleRepository.Read();
             var articles = new List<Article>();
 
             foreach(var article in allArticles)
@@ -111,7 +106,7 @@ namespace CRUD.Services
                 Id = responseJournalViewModel.Id,
                 Name = responseJournalViewModel.Name,
                 Date = responseJournalViewModel.Date,
-                ArticlesList = _repositoryArticle.GetArticles(responseJournalViewModel.ArticlesList),
+                ArticlesList = _articleRepository.GetArticles(responseJournalViewModel.ArticlesList),
             };
 
             return journalViewModel;

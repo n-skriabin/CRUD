@@ -1,5 +1,4 @@
-﻿using CRUD.DataAccess.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,40 +8,38 @@ using CRUD.Domain;
 
 namespace CRUD.DataAccess.Repositories
 {
-    public class PublisherRepository : IRepositoryPublisher
+    public class PublisherRepository
     {
-        ContextModel db;
+        private ContextModel _db;
 
         public PublisherRepository(string ConnectionString)
         {
-            db = new ContextModel(ConnectionString);
+            _db = new ContextModel(ConnectionString);
         }
 
         public List<Publisher> Read()
         {
-            return db.Publishers.ToList();
+            return _db.Publishers.ToList();
         }
 
         public void Create(Publisher publisher, List<Guid> journalsId, List<Guid> booksId)
         {
-            for (int i = 0; i < journalsId.Count; i++)
+            foreach(var journalId in journalsId )
             {
-                Guid journalId = journalsId[i];
-                var journal = db.Journals.Where(p => p.Id == journalId).First();
+                var journal = _db.Journals.Where(p => p.Id == journalId).FirstOrDefault();
                 journal.PublisherId = publisher.Id;
-                db.Entry(journal).State = EntityState.Modified;
+                _db.Entry(journal).State = EntityState.Modified;
             }
 
-            for (int i = 0; i < booksId.Count; i++)
+            foreach(var bookId in booksId)
             {
-                Guid bookId = booksId[i];
-                var book = db.Books.Where(p => p.Id == bookId).First();
+                var book = _db.Books.Where(p => p.Id == bookId).FirstOrDefault();
                 book.PublisherId = publisher.Id;
-                db.Entry(book).State = EntityState.Modified;
+                _db.Entry(book).State = EntityState.Modified;
             }
 
-            db.Publishers.Add(publisher);
-            db.SaveChanges();
+            _db.Publishers.Add(publisher);
+            _db.SaveChanges();
         }
 
         public void Update(Publisher newRecord, List<Guid> journalsId, List<Guid> booksId)
@@ -50,45 +47,43 @@ namespace CRUD.DataAccess.Repositories
             Guid oldPublisherId = newRecord.Id;
             PublisherIdNull(oldPublisherId);
 
-            for (int i = 0; i < journalsId.Count; i++)
+            foreach (var journalId in journalsId)
             {
-                Guid journalId = journalsId[i];
-                var journal = db.Journals.Where(p => p.Id == journalId).First();
+                var journal = _db.Journals.Where(p => p.Id == journalId).FirstOrDefault();
                 journal.PublisherId = newRecord.Id;
-                db.Entry(journal).State = EntityState.Modified;
+                _db.Entry(journal).State = EntityState.Modified;
             }
 
-            for (int i = 0; i < booksId.Count; i++)
+            foreach (var bookId in booksId)
             {
-                Guid bookId = booksId[i];
-                var book = db.Books.Where(p => p.Id == bookId).First();
+                var book = _db.Books.Where(p => p.Id == bookId).FirstOrDefault();
                 book.PublisherId = newRecord.Id;
-                db.Entry(book).State = EntityState.Modified;
+                _db.Entry(book).State = EntityState.Modified;
             }
 
-            db.Entry(newRecord).State = EntityState.Modified;
-            db.SaveChanges();
+            _db.Entry(newRecord).State = EntityState.Modified;
+            _db.SaveChanges();
         }
 
         public void Delete(Guid PublisherId)
         {
             PublisherIdNull(PublisherId);
 
-            db.Publishers.Remove(db.Publishers.Where(p => p.Id == PublisherId).First());
-            db.SaveChanges();
+            _db.Publishers.Remove(_db.Publishers.Where(p => p.Id == PublisherId).FirstOrDefault());
+            _db.SaveChanges();
         }
 
         public void PublisherIdNull(Guid PublisherId)
         {
-            var books = db.Books.ToList();
-            var journals = db.Journals.ToList();
+            var books = _db.Books.ToList();
+            var journals = _db.Journals.ToList();
 
             foreach (var book in books)
             {
                 if (book.PublisherId == PublisherId)
                 {
                     book.PublisherId = null;
-                    db.Entry(book).State = EntityState.Modified;
+                    _db.Entry(book).State = EntityState.Modified;
                    
                 }
             }
@@ -98,12 +93,12 @@ namespace CRUD.DataAccess.Repositories
                 if (journal.PublisherId == PublisherId)
                 {
                     journal.PublisherId = null;
-                    db.Entry(journal).State = EntityState.Modified;
+                    _db.Entry(journal).State = EntityState.Modified;
                     
                 }
             }
 
-            db.SaveChanges();
+            _db.SaveChanges();
         }
     }
 }

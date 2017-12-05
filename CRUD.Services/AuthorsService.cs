@@ -10,16 +10,16 @@ namespace CRUD.Services
 {
     public class AuthorsService
     {
-        private IRepositoryAuthor _reposytoryAuthor;
+        private AuthorRepository _authorRepository;
 
         public AuthorsService(string ConnectionString)
         {
-            _reposytoryAuthor = new AuthorRepository(ConnectionString);
+            _authorRepository = new AuthorRepository(ConnectionString);
         }
 
         public List<Author> Read()
-        { 
-            return _reposytoryAuthor.Read();
+        {
+            return _authorRepository.Read();
         }
 
         public void Create(AuthorViewModel authorViewModel)
@@ -33,7 +33,7 @@ namespace CRUD.Services
                 Patronymic = authorViewModel.Patronymic,
                 Abbreviated = GenerateAbbreviated(authorViewModel)
             };
-            _reposytoryAuthor.Create(author);
+            _authorRepository.Create(author);
         }
 
         public void Update(AuthorViewModel authorViewModel)
@@ -46,28 +46,26 @@ namespace CRUD.Services
                 Patronymic = authorViewModel.Patronymic,
                 Abbreviated = GenerateAbbreviated(authorViewModel)
             };
-            _reposytoryAuthor.Update(newRecord);
+            _authorRepository.Update(newRecord);
         }
 
         public void Delete(AuthorViewModel authorViewModel)
         {
-            _reposytoryAuthor.Delete(authorViewModel.Id);
+            _authorRepository.Delete(authorViewModel.Id);
         }
 
         public string GenerateAbbreviated(AuthorViewModel authorViewModel)
         {
-            string Abbreviated = "";
+            string abbreviated = "";
 
             if (authorViewModel.Patronymic != null)
             {
-                Abbreviated = authorViewModel.FirstName[0] + "." + authorViewModel.Patronymic[0] + ". " + authorViewModel.LastName;
+                abbreviated = authorViewModel.FirstName[0] + "." + authorViewModel.Patronymic[0] + ". " + authorViewModel.LastName;
+                return abbreviated;
             }
+            abbreviated = authorViewModel.FirstName[0] + ". " + authorViewModel.LastName;
 
-            if (authorViewModel.Patronymic == null)
-            {
-                Abbreviated = authorViewModel.FirstName[0] + ". " + authorViewModel.LastName;
-            }
-            return Abbreviated;
+            return abbreviated;
         }
     }
 }

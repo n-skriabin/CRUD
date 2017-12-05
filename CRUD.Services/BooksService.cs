@@ -1,5 +1,4 @@
 ﻿using CRUD.DataAccess;
-using CRUD.DataAccess.Interfaces;
 using CRUD.DataAccess.Repositories;
 using CRUD.Domain;
 using CRUD.Views;
@@ -12,39 +11,41 @@ namespace CRUD.Services
 {
     public class BooksService
     {
-        private IRepositoryBook _repositoryBook;
-        private IRepositoryAuthor _repositoryAuthor;
+        private BookRepository _bookRepository;
+        private AuthorRepository _authorRepository;
 
         public BooksService(string ConnectionString)
         {
-            _repositoryBook = new BookRepository(ConnectionString);
-            _repositoryAuthor = new AuthorRepository(ConnectionString);
+            _bookRepository = new BookRepository(ConnectionString);
+            _authorRepository = new AuthorRepository(ConnectionString);
         }
 
         public List<BookViewModel> Read()
         {
-            var books = _repositoryBook.Read();
+            var books = _bookRepository.Read();
             var booksListForViewModel = new List<BookViewModel>();
 
-            if (books.Count != 0)
+            if (books == null || books.Count == 0)
             {
-                for (int i = 0; i < books.Count; i++)
+                return booksListForViewModel;
+            }
+
+            foreach (var book in books)
+            {
+                var authors = _authorRepository.GetAuthors(book.Id);
+                if (authors.Count == 0)
                 {
-                    var authors = _repositoryAuthor.GetAuthors(books[i].Id);
-                    if (authors == null)
-                    {
-                        _repositoryBook.Delete(books[i].Id);
-                        continue;
-                    }
-                    BookViewModel bookViewModel = new BookViewModel
-                    {
-                        Id = books[i].Id,
-                        Name = books[i].Name,
-                        Year = books[i].Year,
-                        AuthorsList = authors,
-                    };
-                    booksListForViewModel.Add(bookViewModel);
+                    _bookRepository.Delete(book.Id);
+                    continue;
                 }
+                BookViewModel bookViewModel = new BookViewModel
+                {
+                    Id = book.Id,
+                    Name = book.Name,
+                    Year = book.Year,
+                    AuthorsList = authors,
+                };
+                booksListForViewModel.Add(bookViewModel);
             }
             return booksListForViewModel;
         }
@@ -56,7 +57,7 @@ namespace CRUD.Services
             var book = ViewModelToDomain(responseBookViewModel);
             var bookViewModel = DomainToViewModel(responseBookViewModel);
 
-            _repositoryBook.Create(book, responseBookViewModel.AuthorsList);
+            _bookRepository.Create(book, responseBookViewModel.AuthorsList);
 
             return bookViewModel;
         }
@@ -66,14 +67,14 @@ namespace CRUD.Services
             var book = ViewModelToDomain(responseBookViewModel);
             var bookViewModel = DomainToViewModel(responseBookViewModel);
 
-            _repositoryBook.Update(book, responseBookViewModel.AuthorsList);
+            _bookRepository.Update(book, responseBookViewModel.AuthorsList);
 
             return bookViewModel;
         }
 
         public void Delete(BookViewModel bookViewModel)
         {
-            _repositoryBook.Delete(bookViewModel.Id);
+            _bookRepository.Delete(bookViewModel.Id);
         }
 
         public Book ViewModelToDomain(ResponseBookViewModel responseBookViewModel)
@@ -95,7 +96,7 @@ namespace CRUD.Services
                 Id = responseBookViewModel.Id,
                 Name = responseBookViewModel.Name,
                 Year = responseBookViewModel.Year,
-                AuthorsList = _repositoryAuthor.GetAuthors(responseBookViewModel.Id),
+                AuthorsList = _authorRepository.GetAuthors(responseBookViewModel.Id),
             };
 
             return bookViewModel;

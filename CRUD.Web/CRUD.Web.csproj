@@ -737,6 +737,10 @@
     <Content Include="Content\kendo\Uniform\sprite_kpi_2x.png" />
     <Content Include="Content\spinner.svg" />
     <Content Include="Content\web\menu\header.jpg" />
+    <Content Include="Content\web\styles\kendo.common.min.css" />
+    <Content Include="Content\web\styles\kendo.material.min.css" />
+    <Content Include="Content\web\styles\kendo.mobile.all.min.css" />
+    <Content Include="Content\web\styles\kendo.rtl.min.css" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
@@ -746,6 +750,10 @@
     <Content Include="Scripts\app\grids\ArticlesGrid.js" />
     <Content Include="Scripts\app\grids\JournalsGrid.js" />
     <Content Include="Scripts\app\grids\PublishersGrid.js" />
+    <Content Include="Scripts\app\js\angular.min.js" />
+    <Content Include="Scripts\app\js\jquery-1.12.3.min.js" />
+    <Content Include="Scripts\app\js\jszip.min.js" />
+    <Content Include="Scripts\app\js\kendo.all.min.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="ApplicationInsights.config">
@@ -2804,7 +2812,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

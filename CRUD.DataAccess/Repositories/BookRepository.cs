@@ -1,5 +1,4 @@
-﻿using CRUD.DataAccess.Interfaces;
-using CRUD.Domain;
+﻿using CRUD.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,92 +8,87 @@ using System.Data.Entity;
 
 namespace CRUD.DataAccess.Repositories
 {
-    public class BookRepository : IRepositoryBook
+    public class BookRepository
     {
-        ContextModel db;
+        private ContextModel _db;
 
         public BookRepository(string ConnectionString)
         {
-            db = new ContextModel(ConnectionString);
+            _db = new ContextModel(ConnectionString);
         }
 
         public void Create(Book book, List<Guid> authorsListId)
         {
-            for (int i = 0; i < authorsListId.Count; i++)
+            foreach(var authorID in authorsListId)
             {
                 var bookAuthor = new BooksAuthors
                 {
                     Id = Guid.NewGuid(),
                     BookId = book.Id,
-                    AuthorId = authorsListId[i],
+                    AuthorId = authorID,
                 };
-                db.BooksAuthors.Add(bookAuthor);
+                _db.BooksAuthors.Add(bookAuthor);
             }
 
-            db.Books.Add(book);
-            db.SaveChanges();
+            _db.Books.Add(book);
+            _db.SaveChanges();
         }
 
-        public void Update(Book newRecord, List<Guid> authorsListId)
+        public void Update(Book newRecord, List<Guid> authorsListIds)
         {
             DeleteBook(newRecord.Id);
 
-            for (int i = 0; i < authorsListId.Count; i++)
+            foreach (var authorId in authorsListIds)
             {
                 var bookAuthor = new BooksAuthors
                 {
                     Id = Guid.NewGuid(),
                     BookId = newRecord.Id,
-                    AuthorId = authorsListId[i],
+                    AuthorId = authorId,
                 };
-                db.BooksAuthors.Add(bookAuthor);
+                _db.BooksAuthors.Add(bookAuthor);
             }
 
-            db.Entry(newRecord).State = EntityState.Modified;
-            db.SaveChanges();
+            _db.Entry(newRecord).State = EntityState.Modified;
+            _db.SaveChanges();
         }
 
         public List<Book> Read()
         {
-            return db.Books.ToList();
+            return _db.Books.ToList();
         }
 
         public void Delete(Guid BookId)
         {
-            var booksauthors = db.BooksAuthors.ToList();
+            var listForDelete = _db.BooksAuthors.Where(ba => ba.BookId == BookId).ToList();
 
-            foreach (var book in booksauthors)
+            foreach (var record in listForDelete)
             {
-                if (book.BookId == BookId)
-                {
-                    db.BooksAuthors.Remove(book);
-                }
+                _db.BooksAuthors.Remove(record);
             }
-            var recordBookForDelete = db.Books.Where(b => b.Id == BookId).First();
-            db.Books.Remove(recordBookForDelete);
-            db.SaveChanges();
+
+            var recordBookForDelete = _db.Books.Where(b => b.Id == BookId).FirstOrDefault();
+            _db.Books.Remove(recordBookForDelete);
+            _db.SaveChanges();
         }
 
         public void DeleteBook(Guid BookId)
         {
-            var booksauthors = db.BooksAuthors.ToList();
+            var booksauthors = _db.BooksAuthors.Where(ba => ba.BookId == BookId).ToList();
 
             foreach (var book in booksauthors)
             {
-                if (book.BookId == BookId)
-                {
-                    db.BooksAuthors.Remove(book);
-                }
+                _db.BooksAuthors.Remove(book);    
             }
-            db.SaveChanges();
+            _db.SaveChanges();
         }
 
-        public List<Book> GetBooks(List<Guid> booksListId)
+        public List<Book> GetBooks(List<Guid> booksListIds)
         {
             var booksList = new List<Book>();
-            foreach (var bookId in booksListId)
+            foreach (var bookId in booksListIds)
             {
-                booksList.Add(db.Books.Where(b => b.Id == bookId).First());
+                booksList.Add(_db.Books.Where(b => b.Id == bookId).FirstOrDefault());
             }
             return booksList;
         }

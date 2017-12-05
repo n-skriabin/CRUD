@@ -1,5 +1,4 @@
 ﻿using CRUD.DataAccess;
-using CRUD.DataAccess.Interfaces;
 using CRUD.DataAccess.Repositories;
 using CRUD.Domain;
 using CRUD.Views;
@@ -14,32 +13,32 @@ namespace CRUD.Services
 {
     public class PublishersService
     {
-        private IRepositoryBook _repositoryBook;
-        private IRepositoryJournal _repositoryJournal;
-        private IRepositoryPublisher _repositoryPublisher;
+        private BookRepository _bookRepository;
+        private JournalRepository _journalRepository;
+        private PublisherRepository _publisherRepository;
 
         public PublishersService(string ConnectionString)
         {
-            _repositoryBook = new BookRepository(ConnectionString);
-            _repositoryJournal = new JournalRepository(ConnectionString);
-            _repositoryPublisher = new PublisherRepository(ConnectionString);
+            _bookRepository = new BookRepository(ConnectionString);
+            _journalRepository = new JournalRepository(ConnectionString);
+            _publisherRepository = new PublisherRepository(ConnectionString);
         }
 
         public List<PublisherViewModel> Read()
         {
-            var publishers = _repositoryPublisher.Read();
+            var publishers = _publisherRepository.Read();
             List<PublisherViewModel> publisherListForViewModel = new List<PublisherViewModel>();
 
-            for (int i = 0; i < publishers.Count; i++)
+            foreach(var publisher in publishers)
             {
-                var journals = _repositoryJournal.GetJournals(publishers[i].Id);
-                var books = _repositoryBook.GetBooks(publishers[i].Id); 
+                var journals = _journalRepository.GetJournals(publisher.Id);
+                var books = _bookRepository.GetBooks(publisher.Id); 
                 PublisherViewModel publisherViewModel = new PublisherViewModel
                 {
-                    Id = publishers[i].Id,
-                    Name = publishers[i].Name,
-                    BooksList = _repositoryBook.GetBooks(publishers[i].Id),
-                    JournalsList = _repositoryJournal.GetJournals(publishers[i].Id),
+                    Id = publisher.Id,
+                    Name = publisher.Name,
+                    BooksList = _bookRepository.GetBooks(publisher.Id),
+                    JournalsList = _journalRepository.GetJournals(publisher.Id),
                 };
                 publisherListForViewModel.Add(publisherViewModel);
             }
@@ -51,7 +50,7 @@ namespace CRUD.Services
             responsePublisherViewModel.Id = Guid.NewGuid();
 
             var publisher = ViewModelToDomain(responsePublisherViewModel);
-            _repositoryPublisher.Create(publisher, responsePublisherViewModel.JournalsListId, responsePublisherViewModel.BooksListId);
+            _publisherRepository.Create(publisher, responsePublisherViewModel.JournalsListId, responsePublisherViewModel.BooksListId);
 
             var publisherViewModel = DomainToViewModel(responsePublisherViewModel, publisher.Id);
 
@@ -61,7 +60,7 @@ namespace CRUD.Services
         public PublisherViewModel Update(ResponsePublisherViewModel responsePublisherViewModel)
         {
             var publisher = ViewModelToDomain(responsePublisherViewModel);
-            _repositoryPublisher.Update(publisher, responsePublisherViewModel.JournalsListId, responsePublisherViewModel.BooksListId);
+            _publisherRepository.Update(publisher, responsePublisherViewModel.JournalsListId, responsePublisherViewModel.BooksListId);
 
             var publisherViewModel = DomainToViewModel(responsePublisherViewModel, publisher.Id);
 
@@ -70,7 +69,7 @@ namespace CRUD.Services
 
         public void Delete(PublisherViewModel publisherViewModel)
         {
-            _repositoryJournal.Delete(publisherViewModel.Id);
+            _journalRepository.Delete(publisherViewModel.Id);
         }     
         
         public Publisher ViewModelToDomain(ResponsePublisherViewModel responsePublisherViewModel)
@@ -90,8 +89,8 @@ namespace CRUD.Services
             {
                 Id = responsePublisherViewModel.Id,
                 Name = responsePublisherViewModel.Name,
-                BooksList = _repositoryBook.GetBooks(publisherId),
-                JournalsList = _repositoryJournal.GetJournals(publisherId),
+                BooksList = _bookRepository.GetBooks(publisherId),
+                JournalsList = _journalRepository.GetJournals(publisherId),
             };
 
             return publisherViewModel;

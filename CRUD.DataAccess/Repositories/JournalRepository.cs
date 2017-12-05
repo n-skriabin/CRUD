@@ -1,5 +1,4 @@
-﻿using CRUD.DataAccess.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,66 +8,61 @@ using CRUD.Domain;
 
 namespace CRUD.DataAccess.Repositories
 {
-    public class JournalRepository : IRepositoryJournal
+    public class JournalRepository
     {
-        ContextModel db;
+        private ContextModel _db;
 
         public JournalRepository(string ConnectionString)
         {
-            db = new ContextModel(ConnectionString);
+            _db = new ContextModel(ConnectionString);
         }
 
         public void Create(Journal journal, List<Guid> articlesId)
         {
-            var articlesList = db.Articles.ToList();
             foreach (var articleId in articlesId)
             {
                 Guid? articleIdString = articleId;
-                var article = db.Articles.Where(a => a.Id == articleIdString).First();
+                var article = _db.Articles.Where(a => a.Id == articleIdString).FirstOrDefault();
                 article.JournalId = journal.Id;
-                db.Entry(article).State = EntityState.Modified;
+                _db.Entry(article).State = EntityState.Modified;
             }
 
-            db.Journals.Add(journal);
-            db.SaveChanges();
+            _db.Journals.Add(journal);
+            _db.SaveChanges();
         }
 
         public void Update(Journal journal, List<Guid> articlesId)
         {
-            var articlesList = db.Articles.ToList();
             foreach (var articleId in articlesId)
             {
                 Guid? articleIdString = articleId;
-                var article = db.Articles.Where(a => a.Id == articleIdString).First();
+                var article = _db.Articles.Where(a => a.Id == articleIdString).FirstOrDefault();
                 article.JournalId = journal.Id;
-                db.Entry(article).State = EntityState.Modified;
+                _db.Entry(article).State = EntityState.Modified;
             }
 
-            db.Entry(journal).State = EntityState.Modified;
-            db.SaveChanges();
+            _db.Entry(journal).State = EntityState.Modified;
+            _db.SaveChanges();
         }
 
         public void Delete(Guid JournalId)
         {
-            var recordForDelete = db.Journals.Where(b => b.Id == JournalId).First();
-            var articles = db.Articles.ToList();
+            var recordForDelete = _db.Journals.Where(b => b.Id == JournalId).FirstOrDefault();
+            var articles = _db.Articles.Where(a => a.JournalId == JournalId).ToList();
 
             foreach (var article in articles)
             {
-                if (article.Id == JournalId)
-                {
-                    article.JournalId = Guid.Empty;
-                    db.Entry(article).State = EntityState.Modified;                   
-                }
+                article.JournalId = Guid.Empty;
+                _db.Entry(article).State = EntityState.Modified;                   
             }
 
-            db.Journals.Remove(recordForDelete);
-            db.SaveChanges();
+            _db.Journals.Remove(recordForDelete);
+            _db.SaveChanges();
         }
 
         public List<Journal> Read()
         {
-            return db.Journals.ToList();
+            return _db.Journals.ToList();
         }
 
         public List<Journal> GetJournals(List<Guid> journalsListId)
@@ -77,7 +71,7 @@ namespace CRUD.DataAccess.Repositories
 
             foreach (var journalId in journalsListId)
             {
-                journals.Add(db.Journals.Where(j => j.Id == journalId).First());
+                journals.Add(_db.Journals.Where(j => j.Id == journalId).FirstOrDefault());
             }
 
             return journals;
@@ -85,16 +79,7 @@ namespace CRUD.DataAccess.Repositories
 
         public List<Journal> GetJournals(Guid PublisherId)
         {
-            var journals = Read();
-            var journalsList = new List<Journal>();
-            foreach (var journal in journals)
-            {
-                if (journal.PublisherId == PublisherId)
-                {
-                    journalsList.Add(journal);
-                }
-            }
-
+            var journalsList = _db.Journals.Where(j => j.PublisherId == PublisherId).ToList();
             return journalsList;
         }
     }
