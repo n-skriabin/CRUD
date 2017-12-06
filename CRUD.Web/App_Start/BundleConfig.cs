@@ -22,17 +22,16 @@ namespace CRUD.Web
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
-                      "~/Content/web/styles/kendo.common.min.css",
-                      "~/Content/web/styles/kendo.material.min.css",
-                      "~/Content/web/styles/kendo.mobile.all.min.css",
-                      "~/Content/web/styles/kendo.rtl.min.css",
+                      "~/Content/styles/kendo.common.min.css",
+                      "~/Content/styles/kendo.material.min.css",
+                      "~/Content/styles/kendo.mobile.all.min.css",
+                      "~/Content/styles/kendo.rtl.min.css",
                       "~/Content/site.css"));
 
             bundles.Add(new StyleBundle("~/Content/styles").Include(
-                      "~/Content/web/styles/kendo.common.min.css",
-                      "~/Content/web/styles/kendo.material.min.css",
-                      "~/Content/web/styles/kendo.mobile.all.min.css",
-                      "~/Content/web/styles/kendo.rtl.min.css"
+                    
+                      "~/Content/web/menu/menu.css"
+                     
                 ));
 
             bundles.Add(new ScriptBundle("~/bundles/kendo").Include(
@@ -42,21 +41,14 @@ namespace CRUD.Web
                  "~/Scripts/app/grids/ArticlesGrid.js",
                  "~/Scripts/app/grids/JournalsGrid.js",
                  "~/Scripts/app/grids/PublishersGrid.js",
-                 "~/Scripts/app/js/angular.min.js",
-                 "~/Scripts/app/js/jquery-1.12.3.min.js",
-                 "~/Scripts/app/js/jszip.min.js",
-                 "~/Scripts/app/js/kendo.all.min.js",
+                 "~/Scripts/kendo/angular.min.js",
+                 "~/Scripts/kendo/jquery-1.12.3.min.js",
+                 "~/Scripts/kendo/jszip.min.js",
+                 "~/Scripts/kendo/kendo.all.min.js",
                 "~/Scripts/kendo/kendo.aspnetmvc.min.js"));
 
-            bundles.Add(new ScriptBundle("~/Scripts/js").Include(
-                "~/Scripts/app/js/angular.min.js",
-                 "~/Scripts/app/js/jquery-1.12.3.min.js",
-                 "~/Scripts/app/js/jszip.min.js",
-                 "~/Scripts/app/js/kendo.all.min.js"));
-
             bundles.Add(new StyleBundle("~/Content/kendo/css").Include(
-                "~/Content/kendo/kendo.common-bootstrap.min.css",
-                
+                "~/Content/kendo/kendo.common-bootstrap.min.css",               
                 "~/Content/kendo/kendo.bootstrap.min.css"));
 
             bundles.IgnoreList.Clear();

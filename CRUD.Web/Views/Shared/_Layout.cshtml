@@ -6,49 +6,15 @@
     <title>@ViewBag.Title - My ASP.NET Application</title>
 
     @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/styles")
     @Scripts.Render("~/bundles/modernizr")
 
     @Scripts.Render("~/bundles/modernizr")
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/kendo")
 
-    @*@Styles.Render("~/Content/styles")
-    @Scripts.Render("~/Scripts/js")*@
-
-    @*<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.1026/styles/kendo.common.min.css">
-    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.1026/styles/kendo.rtl.min.css">
-    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.1026/styles/kendo.material.min.css">
-    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.1026/styles/kendo.mobile.all.min.css">
-
-    <script src="https://code.jquery.com/jquery-1.12.3.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2017.3.1026/js/angular.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2017.3.1026/js/jszip.min.js"></script>
-    <script src="https://kendo.cdn.telerik.com/2017.3.1026/js/kendo.all.min.js"></script>*@
-
-    <style>
-        #page-preloader {
-            position: fixed;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            background: #4169E0;
-            z-index: 100500;
-        }
-
-            #page-preloader .spinner {
-                width: 64px;
-                height: 64px;
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                background: url('../../Content/spinner.svg') no-repeat 50% 50%;
-                margin: -16px 0 0 -16px;
-            }
-    </style>
 </head>
-<body>
-    <div id="page-preloader"><span class="spinner"></span></div>
+<body>   
     <div class="row">
         <div id="megaStore">
             <p></p>
@@ -71,66 +37,17 @@
             </ul>
         </div>
     </div>
-    <style>
-        #megaStore {
-            max-width: 715px;
-            margin: 30px auto;
-            padding-top: 120px;
-            background: url('/Content/web/menu/header.jpg') no-repeat center 0;
-        }
 
-        #menu h2 {
-            font-size: 1em;
-            text-transform: uppercase;
-            padding: 5px 10px;
-        }
-
-        #template img {
-            margin: 5px 20px 0 0;
-            float: left;
-        }
-
-        #template {
-            width: 380px;
-        }
-
-            #template ol {
-                float: left;
-                margin: 0 0 0 30px;
-                padding: 10px 10px 0 10px;
-            }
-
-            #template:after {
-                content: ".";
-                display: block;
-                height: 0;
-                clear: both;
-                visibility: hidden;
-            }
-
-            #template .k-button {
-                float: left;
-                clear: left;
-                margin: 5px 0 5px 12px;
-            }
- 
-    </style>
     <script>
         $(document).ready(function () {
             $("#menu").kendoMenu();
         });
-
-        $(window).on('load', function () {
-            var $preloader = $('#page-preloader'),
-                $spinner = $preloader.find('.spinner');
-            $spinner.fadeOut();
-            $preloader.delay(500).fadeOut('slow');
-        });
-
     </script>
 
         <div class="container body-content">
+
             @RenderBody()
+
             <hr />          
         </div>
 
