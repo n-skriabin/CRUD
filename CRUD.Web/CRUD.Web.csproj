@@ -753,6 +753,9 @@
     <Content Include="Scripts\app\grids\ArticlesGrid.js" />
     <Content Include="Scripts\app\grids\JournalsGrid.js" />
     <Content Include="Scripts\app\grids\PublishersGrid.js" />
+    <Content Include="Scripts\app\pre-loader\spinner.css" />
+    <Content Include="Scripts\app\pre-loader\spinner.js" />
+    <Content Include="Scripts\app\pre-loader\spinner.svg" />
     <Content Include="Scripts\js\angular.min.js" />
     <Content Include="Scripts\js\jquery-1.12.3.min.js" />
     <Content Include="Scripts\js\jszip.min.js" />

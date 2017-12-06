@@ -28,7 +28,8 @@ namespace CRUD.Web
 
             bundles.Add(new StyleBundle("~/Content/styles").Include(
                       "~/Content/styles/kendo.common.min.css",
-                      "~/Content/styles/kendo.default.css",                
+                      "~/Content/styles/kendo.default.css",
+                      "~/Scripts/app/pre-loader/spinner.css",
                       "~/Content/web/menu/menu.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/kendo").Include(
@@ -42,6 +43,7 @@ namespace CRUD.Web
                  "~/Scripts/kendo/jquery-1.12.3.min.js",
                  "~/Scripts/kendo/jszip.min.js",
                  "~/Scripts/kendo/kendo.all.min.js",
+                 "~/Scripts/app/pre-loader/spinner.js",
                 "~/Scripts/kendo/kendo.aspnetmvc.min.js"));
 
             bundles.Add(new StyleBundle("~/Content/kendo/css").Include(

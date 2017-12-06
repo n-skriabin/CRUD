@@ -1,0 +1,19 @@
+#page-preloader {
+            position: fixed;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            background: #4169E0;
+            z-index: 100500;
+        }
+
+            #page-preloader .spinner {
+                width: 64px;
+                height: 64px;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                background: url('spinner.svg') no-repeat 50% 50%;
+                margin: -16px 0 0 -16px;
+            }
