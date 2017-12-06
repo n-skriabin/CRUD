@@ -51,6 +51,7 @@ namespace CRUD.DataAccess.Repositories
         public List<Article> GetArticles(List<Guid> articlesIds)
         {
             var articles = new List<Article>();
+
             foreach (var id in articlesIds) {
                 articles.Add(_db.Articles.Where(a => a.Id == id).FirstOrDefault());
             }

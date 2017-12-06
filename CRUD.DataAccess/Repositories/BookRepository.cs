@@ -96,16 +96,7 @@ namespace CRUD.DataAccess.Repositories
         public List<Book> GetBooks(Guid PublisherId)
         {
 
-            var books = Read();
-            var booksList = new List<Book>();
-
-            foreach (var book in books)
-            {
-                if (book.PublisherId == PublisherId)
-                {
-                    booksList.Add(book);
-                }
-            }
+            var booksList = _db.Books.Where(b => b.PublisherId == PublisherId).ToList();
 
             return booksList;
         }

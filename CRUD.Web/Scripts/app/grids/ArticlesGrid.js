@@ -4,7 +4,7 @@
         columns: [
             { field: "Name", title: "Article name" },
             { field: "Year", title: "Date" },
-            { field: "AuthorID", title: "Author", editor: authorsDropDownEditor, template: "#= JSON.stringify(data.Abbreviated) #" },
+            { field: "AuthorId", title: "Author", editor: authorsDropDownEditor, template: "#= JSON.stringify(data.Abbreviated) #" },
             { command: ["edit", "destroy"], title: "Actions", width: "200px" }
         ],
         editable: "popup",
@@ -30,8 +30,7 @@
                         Id: { validation: { required: false, editable: false } },
                         Name: { validation: { required: true } },
                         Year: { validation: { required: true } },
-                        Abbreviated: {},
-                        AuthorId: {},
+                        AuthorId: { },
                     }
                 }
             },
@@ -63,6 +62,8 @@
                 parameterMap: function (data, operation) {
                     if (operation != "read") {
                         var articleViewModel = data.models[0];
+                        //articleViewModel.AuthorId = data.models[0]
+                        console.log(articleViewModel);
                         return articleViewModel;
                     } else {
                         return { data: kendo.stringify(operation.data) }

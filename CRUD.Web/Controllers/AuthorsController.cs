@@ -54,9 +54,10 @@ namespace CRUD.Web.Controllers
             return Json(new[] { authorViewModel });
         }
 
-        public ActionResult ReadAuthorsForDropDown(AuthorViewModel authorViewModel)
+        public ActionResult ReadAuthorsForDropDown()
         {
-            return Json(authorsService.Read(), JsonRequestBehavior.AllowGet);
+            var authors = authorsService.Read();
+            return Json(authors, JsonRequestBehavior.AllowGet);
         }
     }
 }
