@@ -74,16 +74,7 @@ namespace CRUD.Services
 
         public List<Article> GetArticlesList(Guid? JournalId)
         {
-            var allArticles = _articleRepository.Read();
-            var articles = new List<Article>();
-
-            foreach(var article in allArticles)
-            {
-                if (article.JournalId == JournalId)
-                {
-                    articles.Add(article);
-                }
-            }
+            var articles = _articleRepository.GetArticles(JournalId);
             return articles;
         }
 

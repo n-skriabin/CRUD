@@ -57,5 +57,12 @@ namespace CRUD.DataAccess.Repositories
             }
             return articles;
         }
+
+        public List<Article> GetArticles(Guid? JournalId)
+        {
+            var articles = _db.Articles.Where(a => a.JournalId == JournalId).ToList();
+
+            return articles;
+        }
     }
 }
