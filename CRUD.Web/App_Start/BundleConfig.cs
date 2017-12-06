@@ -23,16 +23,13 @@ namespace CRUD.Web
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/styles/kendo.common.min.css",
-                      "~/Content/styles/kendo.material.min.css",
-                      "~/Content/styles/kendo.mobile.all.min.css",
-                      "~/Content/styles/kendo.rtl.min.css",
+                      "~/Content/styles/kendo.default.min.css",                
                       "~/Content/site.css"));
 
             bundles.Add(new StyleBundle("~/Content/styles").Include(
-                    
-                      "~/Content/web/menu/menu.css"
-                     
-                ));
+                      "~/Content/styles/kendo.common.min.css",
+                      "~/Content/styles/kendo.default.css",                
+                      "~/Content/web/menu/menu.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/kendo").Include(
                 "~/Scripts/kendo/kendo.all.min.js",
