@@ -18,7 +18,7 @@ namespace CRUD.Web.Controllers
 
         public JournalsController()
         {
-            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name;
+            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].ConnectionString;
             journalsService = new JournalsService(connectionString);
         }
 
@@ -29,7 +29,12 @@ namespace CRUD.Web.Controllers
 
         public JsonResult Read([DataSourceRequest] DataSourceRequest request)
         {
-            return Json(journalsService.Read().ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+            var journals = journalsService.Read();
+            if (journals == null)
+            {
+                return null;
+            }
+            return Json(journals.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
         [AcceptVerbs(System.Web.Mvc.HttpVerbs.Post)]

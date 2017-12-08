@@ -19,7 +19,7 @@ namespace CRUD.Web.Controllers
 
         public BooksController()
         {
-            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name;
+            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].ConnectionString;
             booksService = new BooksService(connectionString);
         }
 
@@ -30,7 +30,12 @@ namespace CRUD.Web.Controllers
 
         public JsonResult Read([DataSourceRequest] DataSourceRequest request)
         {
-            return Json(booksService.Read().ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+            var books = booksService.Read();
+            if(books == null)
+            {
+                return null;
+            }
+            return Json(books.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
         [AcceptVerbs(System.Web.Mvc.HttpVerbs.Post)]

@@ -5,100 +5,72 @@ using System.Text;
 using System.Data.Entity;
 using System.Threading.Tasks;
 using CRUD.Domain;
+using System.Data;
+using System.Data.SqlClient;
+using Dapper;
 
 namespace CRUD.DataAccess.Repositories
 {
     public class PublisherRepository
     {
-        private ContextModel _db;
+        private IDbConnection _db;
 
-        public PublisherRepository(string ConnectionString)
+        public PublisherRepository(string connectionString)
         {
-            _db = new ContextModel(ConnectionString);
+            _db = new SqlConnection(connectionString);
         }
 
         public List<Publisher> Read()
         {
-            return _db.Publishers.ToList();
+            var publishers = _db.Query<Publisher>("SELECT * FROM Publishers").ToList();
+            return publishers;
         }
 
         public void Create(Publisher publisher, List<Guid> journalsId, List<Guid> booksId)
         {
-            foreach(var journalId in journalsId )
-            {
-                var journal = _db.Journals.Where(p => p.Id == journalId).FirstOrDefault();
-                journal.PublisherId = publisher.Id;
-                _db.Entry(journal).State = EntityState.Modified;
-            }
+            var arrayBooksIds = booksId.ToArray();
+            _db.Execute("UPDATE Books SET PublisherId = '" + publisher.Id + "' WHERE Id IN @arrayBooksIds", new { arrayBooksIds });
 
-            foreach(var bookId in booksId)
-            {
-                var book = _db.Books.Where(p => p.Id == bookId).FirstOrDefault();
-                book.PublisherId = publisher.Id;
-                _db.Entry(book).State = EntityState.Modified;
-            }
+            var arrayJournalsIds = journalsId.ToArray();
+            _db.Execute("UPDATE Journals SET PublisherId = '" + publisher.Id + "' WHERE Id IN @arrayJournalsIds", new { arrayJournalsIds });
 
-            _db.Publishers.Add(publisher);
-            _db.SaveChanges();
+            _db.Query<Publisher>("INSERT INTO Publishers (Id, Name) VALUES (@Id, @Name)", publisher);
         }
 
         public void Update(Publisher newRecord, List<Guid> journalsId, List<Guid> booksId)
         {
-            Guid oldPublisherId = newRecord.Id;
-            PublisherIdNull(oldPublisherId);
+            PublisherIdNull(newRecord.Id);
 
-            foreach (var journalId in journalsId)
-            {
-                var journal = _db.Journals.Where(p => p.Id == journalId).FirstOrDefault();
-                journal.PublisherId = newRecord.Id;
-                _db.Entry(journal).State = EntityState.Modified;
-            }
+            var arrayBooksIds = booksId.ToArray();
+            _db.Execute("UPDATE Books SET PublisherId = '" + newRecord.Id + "' WHERE Id IN @arrayBooksIds", new { arrayBooksIds });
 
-            foreach (var bookId in booksId)
-            {
-                var book = _db.Books.Where(p => p.Id == bookId).FirstOrDefault();
-                book.PublisherId = newRecord.Id;
-                _db.Entry(book).State = EntityState.Modified;
-            }
+            var arrayJournalsIds = journalsId.ToArray();
+            _db.Execute("UPDATE Journals SET PublisherId = '" + newRecord.Id + "' WHERE Id IN @arrayJournalsIds", new { arrayJournalsIds });
 
-            _db.Entry(newRecord).State = EntityState.Modified;
-            _db.SaveChanges();
+            _db.Execute("UPDATE Publishers SET Name = @Name WHERE Id = '" + newRecord.Id + "'", newRecord);
         }
 
-        public void Delete(Guid PublisherId)
+        public void Delete(Guid publisherId)
         {
-            PublisherIdNull(PublisherId);
+            PublisherIdNull(publisherId);
 
-            _db.Publishers.Remove(_db.Publishers.Where(p => p.Id == PublisherId).FirstOrDefault());
-            _db.SaveChanges();
+            _db.Query<Publisher>("DELETE FROM Publishers WHERE Id = @publisherId", new { publisherId });
         }
 
-        public void PublisherIdNull(Guid PublisherId)
+        public void PublisherIdNull(Guid publisherId)
         {
-            var books = _db.Books.ToList();
-            var journals = _db.Journals.ToList();
+            var emptyGuid = Guid.Empty;
+            _db.Query<Book>("UPDATE Books SET PublisherId = '" + emptyGuid + "' WHERE PublisherId = @publisherId", new { publisherId });
+            _db.Query<Journal>("UPDATE Journals SET PublisherId = '" + emptyGuid + "' WHERE PublisherId = @publisherId", new { publisherId });
+        }
 
-            foreach (var book in books)
-            {
-                if (book.PublisherId == PublisherId)
-                {
-                    book.PublisherId = null;
-                    _db.Entry(book).State = EntityState.Modified;
-                   
-                }
-            }
+        public void AddBooksJournals(string publisherId, List<Guid> journalsId, List<Guid> booksId)
+        {
+            var arrayBooksIds = booksId.ToArray();
+            _db.Execute("UPDATE Books SET PublisherId = " + publisherId + " WHERE Id IN @arrayBooksIds", new { arrayBooksIds });
 
-            foreach (var journal in journals)
-            {
-                if (journal.PublisherId == PublisherId)
-                {
-                    journal.PublisherId = null;
-                    _db.Entry(journal).State = EntityState.Modified;
-                    
-                }
-            }
-
-            _db.SaveChanges();
+            var arrayJournalsIds = journalsId.ToArray();
+            _db.Execute("UPDATE Journals SET PublisherId = " + publisherId + " WHERE Id IN @arrayJournalsIds", new { arrayJournalsIds });
         }
     }
 }

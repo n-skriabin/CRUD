@@ -27,17 +27,12 @@ namespace CRUD.Services
 
             if (books == null || books.Count == 0)
             {
-                return booksListForViewModel;
+                return null;
             }
 
             foreach (var book in books)
             {
                 var authors = _authorRepository.GetAuthors(book.Id);
-                if (authors.Count == 0)
-                {
-                    _bookRepository.Delete(book.Id);
-                    continue;
-                }
                 BookViewModel bookViewModel = new BookViewModel
                 {
                     Id = book.Id,

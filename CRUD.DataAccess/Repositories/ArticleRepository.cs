@@ -5,63 +5,58 @@ using System.Text;
 using System.Threading.Tasks;
 using CRUD.Domain;
 using System.Data.Entity;
+using System.Data;
+using System.Data.SqlClient;
+using Dapper;
 
 namespace CRUD.DataAccess.Repositories
 {
     public class ArticleRepository 
     {
-        private ContextModel _db;
+        private IDbConnection _db;
 
-        public ArticleRepository(string ConnectionString)
+        public ArticleRepository(string connectionString)
         {
-            _db = new ContextModel(ConnectionString);
-        }
-
-        public void Create(Article article)
-        {
-            var author = _db.Authors.Where(a => a.Id == article.AuthorId).FirstOrDefault();
-            _db.Articles.Add(article);
-            _db.SaveChanges();
-        }
-
-        public void Delete(Guid ArticleId)
-        {
-            var recordForDelete = _db.Articles.Where(a => a.Id == ArticleId).FirstOrDefault();
-            _db.Articles.Remove(recordForDelete);
-            _db.SaveChanges();
+            _db = new SqlConnection(connectionString);
         }
 
         public List<Article> Read()
         {
-            return _db.Articles.ToList();
+            var articles = _db.Query<Article>("SELECT * FROM Articles").ToList();
+            return articles;
         }
 
-        public void Update(Article oldRecord)
+        public void Create(Article article)
         {
-            _db.Entry(oldRecord).State = EntityState.Modified;
-            _db.SaveChanges();
+            _db.Query<Article>("INSERT INTO Articles (Id, Name, Year, AuthorId) VALUES(@Id, @Name, @Year, @AuthorId);", article);
         }
 
-        public Article GetArticle(Guid ArticleId)
+        public void Update(Article newRecord)
         {
-            var article = _db.Articles.Where(a => a.Id == ArticleId).FirstOrDefault();
+            _db.Execute("UPDATE Articles SET Name = @Name, Year = @Year, AuthorId = @AuthorId WHERE Id = @Id", newRecord);
+        }
+
+        public void Delete(Guid id)
+        {
+            _db.Query<Article>("DELETE FROM Articles WHERE Id = @id", new { id });
+        }
+
+        public Article GetArticle(Guid id)
+        {
+            var article = _db.Query<Article>("SELECT * FROM Articles WHERE Id = @id", id).FirstOrDefault();
             return article;
         }
 
         public List<Article> GetArticles(List<Guid> articlesIds)
         {
-            var articles = new List<Article>();
-
-            foreach (var id in articlesIds) {
-                articles.Add(_db.Articles.Where(a => a.Id == id).FirstOrDefault());
-            }
+            var arrayIds = articlesIds.ToArray();
+            var articles = _db.Query<Article>("SELECT * FROM Articles WHERE Id IN @arrayIds", new { arrayIds }).ToList();
             return articles;
         }
 
-        public List<Article> GetArticles(Guid? JournalId)
+        public List<Article> GetArticles(Guid? journalId)
         {
-            var articles = _db.Articles.Where(a => a.JournalId == JournalId).ToList();
-
+            var articles = _db.Query<Article>("SElECT * FROM Articles WHERE JournalId = @journalId", new { journalId }).ToList();
             return articles;
         }
     }

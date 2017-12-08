@@ -19,7 +19,7 @@ namespace CRUD.Web.Controllers
 
         public AuthorsController()
         {
-            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name;
+            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].ConnectionString;
             authorsService = new AuthorsService(connectionString);
         }
 
@@ -30,7 +30,12 @@ namespace CRUD.Web.Controllers
 
         public JsonResult Read([DataSourceRequest] DataSourceRequest request)
         {
-            return Json(authorsService.Read().ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+            var authors = authorsService.Read();
+            if (authors == null)
+            {
+                return null;
+            }
+            return Json(authors.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
         [AcceptVerbs(System.Web.Mvc.HttpVerbs.Post)]

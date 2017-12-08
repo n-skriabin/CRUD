@@ -19,7 +19,7 @@ namespace CRUD.Web.Controllers
 
         public ArticlesController()
         {
-            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name;
+            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].ConnectionString;
             articlesService = new ArticlesService(connectionString);
         }
 
@@ -30,7 +30,12 @@ namespace CRUD.Web.Controllers
 
         public JsonResult Read([DataSourceRequest] DataSourceRequest request)
         {
-            return Json(articlesService.Read().ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+            var articles = articlesService.Read();
+            if (articles == null)
+            {
+                return null;
+            }
+            return Json(articles.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
         [AcceptVerbs(System.Web.Mvc.HttpVerbs.Post)]

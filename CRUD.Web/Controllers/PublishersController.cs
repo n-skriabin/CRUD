@@ -18,7 +18,7 @@ namespace CRUD.Web.Controllers
 
         public PublishersController()
         {
-            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].Name;
+            string connectionString = WebConfigurationManager.ConnectionStrings["ConnectionStringDB"].ConnectionString;
             publishersService = new PublishersService(connectionString);
         }
 
@@ -29,7 +29,12 @@ namespace CRUD.Web.Controllers
 
         public JsonResult Read([DataSourceRequest] DataSourceRequest request)
         {
-            return Json(publishersService.Read().ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
+            var publishers = publishersService.Read();
+            if (publishers == null)
+            {
+                return null;
+            }
+            return Json(publishers.ToDataSourceResult(request), JsonRequestBehavior.AllowGet);
         }
 
         [AcceptVerbs(System.Web.Mvc.HttpVerbs.Post)]

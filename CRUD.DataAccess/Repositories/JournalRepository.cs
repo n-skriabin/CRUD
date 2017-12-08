@@ -5,82 +5,70 @@ using System.Text;
 using System.Data.Entity;
 using System.Threading.Tasks;
 using CRUD.Domain;
+using System.Data;
+using System.Data.SqlClient;
+using Dapper;
 
 namespace CRUD.DataAccess.Repositories
 {
     public class JournalRepository
     {
-        private ContextModel _db;
+        private IDbConnection _db;
 
-        public JournalRepository(string ConnectionString)
+        public JournalRepository(string connectionString)
         {
-            _db = new ContextModel(ConnectionString);
-        }
-
-        public void Create(Journal journal, List<Guid> articlesId)
-        {
-            foreach (var articleId in articlesId)
-            {
-                Guid? articleIdString = articleId;
-                var article = _db.Articles.Where(a => a.Id == articleIdString).FirstOrDefault();
-                article.JournalId = journal.Id;
-                _db.Entry(article).State = EntityState.Modified;
-            }
-
-            _db.Journals.Add(journal);
-            _db.SaveChanges();
-        }
-
-        public void Update(Journal journal, List<Guid> articlesId)
-        {
-            foreach (var articleId in articlesId)
-            {
-                Guid? articleIdString = articleId;
-                var article = _db.Articles.Where(a => a.Id == articleIdString).FirstOrDefault();
-                article.JournalId = journal.Id;
-                _db.Entry(article).State = EntityState.Modified;
-            }
-
-            _db.Entry(journal).State = EntityState.Modified;
-            _db.SaveChanges();
-        }
-
-        public void Delete(Guid JournalId)
-        {
-            var recordForDelete = _db.Journals.Where(b => b.Id == JournalId).FirstOrDefault();
-            var articles = _db.Articles.Where(a => a.JournalId == JournalId).ToList();
-
-            foreach (var article in articles)
-            {
-                article.JournalId = Guid.Empty;
-                _db.Entry(article).State = EntityState.Modified;                   
-            }
-
-            _db.Journals.Remove(recordForDelete);
-            _db.SaveChanges();
+            _db = new SqlConnection(connectionString);
         }
 
         public List<Journal> Read()
         {
-            return _db.Journals.ToList();
+            var journals = _db.Query<Journal>("SELECT * FROM Journals").ToList();
+            return journals;
+        }
+
+        public void Create(Journal journal, List<Guid> articlesIds)
+        {
+            UpdateArticles(journal.Id, articlesIds);
+            _db.Query<Journal>("INSERT INTO Journals (Id, Name, Date) VALUES (@Id, @Name, @Date)", journal);
+        }
+
+        public void Update(Journal journal, List<Guid> articlesId)
+        {
+            var arrayArticlesIds = articlesId.ToArray();
+            var emptyGuid = Guid.Empty;
+            var journalId = journal.Id;
+            _db.Query<Article>("UPDATE Articles SET JournalId = '"+emptyGuid+"' WHERE JournalId = @journalId", new { journalId });
+            _db.Query<Article>("UPDATE Articles SET JournalId = '" + journal.Id + "' WHERE Id IN @arrayArticlesIds", new { arrayArticlesIds });
+        }
+
+        public void Delete(Guid journalId)
+        {
+            var emptyGuid = Guid.Empty;
+            _db.Query<Article>("UPDATE Articles SET JournalId = '" + emptyGuid + "' WHERE JournalId = @journalId", new { journalId });
+            _db.Query<Journal>("DELETE FROM Journals WHERE Id = @journalId", new { journalId });
         }
 
         public List<Journal> GetJournals(List<Guid> journalsListId)
         {
-            var journals = new List<Journal>();
-
-            foreach (var journalId in journalsListId)
-            {
-                journals.Add(_db.Journals.Where(j => j.Id == journalId).FirstOrDefault());
-            }
-
+            var arrayJournalsIds = journalsListId.ToArray();
+            var journals = _db.Query<Journal>("SELECT * FROM Journals WHERE Id IN @arrayJournalsIds", new { arrayJournalsIds }).ToList();
             return journals;
         }
 
-        public List<Journal> GetJournals(Guid PublisherId)
+        public List<Journal> GetJournals(Guid publisherId)
         {
-            var journalsList = _db.Journals.Where(j => j.PublisherId == PublisherId).ToList();
+            var journalsList = _db.Query<Journal>("SELECT * FROM Journals WHERE PublisherId = @publisherId", new { publisherId }).ToList();
             return journalsList;
+        }
+
+        public void UpdateArticles(Guid id, List<Guid> articlesIds)
+        {
+            var arrayArticlesIds = articlesIds.ToArray();
+
+            foreach (var articleId in arrayArticlesIds)
+            {
+                _db.Query<Article>("UPDATE Articles SET JournalId = '" + id + "' WHERE Id = @articleId", new { articleId });
+            }
         }
     }
 }

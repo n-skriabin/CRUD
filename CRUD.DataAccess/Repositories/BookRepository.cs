@@ -5,21 +5,72 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
+using System.Data;
+using System.Data.SqlClient;
+using Dapper;
 
 namespace CRUD.DataAccess.Repositories
 {
     public class BookRepository
     {
-        private ContextModel _db;
+        private IDbConnection _db;
 
-        public BookRepository(string ConnectionString)
+        public BookRepository(string connectionString)
         {
-            _db = new ContextModel(ConnectionString);
+            _db = new SqlConnection(connectionString);
         }
 
-        public void Create(Book book, List<Guid> authorsListId)
+        public List<Book> Read()
         {
-            foreach(var authorID in authorsListId)
+            var books = _db.Query<Book>("SELECT * FROM Books").ToList();
+            return books;
+        }
+
+        public void Create(Book book, List<Guid> authorsListIds)
+        {
+            AddBookInBooksAuthors(book, authorsListIds);
+
+            _db.Query("INSERT INTO Books (Id, Name, Year) VALUES ('"+book.Id+"', '"+book.Name+"', '"+book.Year+"')");
+        }
+
+        public void Update(Book newRecord, List<Guid> authorsListIds)
+        {
+            DeleteBook(newRecord.Id);
+
+            AddBookInBooksAuthors(newRecord, authorsListIds);
+
+            _db.Execute("UPDATE Books SET Name = @Name, Year = @Year WHERE Id = @Id", newRecord);
+        }
+
+        public void Delete(Guid bookId)
+        {
+            DeleteBook(bookId);
+            string stringBookId = bookId.ToString();
+            _db.Query<Book>("DELETE FROM Books WHERE Id = @stringBookId", new { stringBookId });
+        }
+
+        public void DeleteBook(Guid bookId)
+        {
+            var stringBookId = bookId.ToString();
+            _db.Query<BooksAuthors>("DELETE FROM BooksAuthors WHERE BookId = @stringBookId", new { stringBookId });
+        }
+
+        public List<Book> GetBooks(List<Guid> booksListIds)
+        {
+            var arrayIds = booksListIds.ToArray();
+            var booksList = _db.Query<Book>("SELECT * FROM Books WHERE Id IN @arrayIds", arrayIds).ToList();
+            return booksList;
+        }
+
+        public List<Book> GetBooks(Guid publisherId)
+        {
+            var booksList = _db.Query<Book>("SELECT * FROM Books WHERE PublisherId = @publisherId", new { publisherId }).ToList();
+            return booksList;
+        }
+
+        public void AddBookInBooksAuthors(Book book, List<Guid> authorsListId)
+        {
+            foreach (var authorID in authorsListId)
             {
                 var bookAuthor = new BooksAuthors
                 {
@@ -27,78 +78,8 @@ namespace CRUD.DataAccess.Repositories
                     BookId = book.Id,
                     AuthorId = authorID,
                 };
-                _db.BooksAuthors.Add(bookAuthor);
+                _db.Query<BooksAuthors>("INSERT INTO BooksAuthors (Id, BookId, AuthorId) VALUES (@Id, @BookId, @AuthorId)", bookAuthor);
             }
-
-            _db.Books.Add(book);
-            _db.SaveChanges();
-        }
-
-        public void Update(Book newRecord, List<Guid> authorsListIds)
-        {
-            DeleteBook(newRecord.Id);
-
-            foreach (var authorId in authorsListIds)
-            {
-                var bookAuthor = new BooksAuthors
-                {
-                    Id = Guid.NewGuid(),
-                    BookId = newRecord.Id,
-                    AuthorId = authorId,
-                };
-                _db.BooksAuthors.Add(bookAuthor);
-            }
-
-            _db.Entry(newRecord).State = EntityState.Modified;
-            _db.SaveChanges();
-        }
-
-        public List<Book> Read()
-        {
-            return _db.Books.ToList();
-        }
-
-        public void Delete(Guid BookId)
-        {
-            var listForDelete = _db.BooksAuthors.Where(ba => ba.BookId == BookId).ToList();
-
-            foreach (var record in listForDelete)
-            {
-                _db.BooksAuthors.Remove(record);
-            }
-
-            var recordBookForDelete = _db.Books.Where(b => b.Id == BookId).FirstOrDefault();
-            _db.Books.Remove(recordBookForDelete);
-            _db.SaveChanges();
-        }
-
-        public void DeleteBook(Guid BookId)
-        {
-            var booksauthors = _db.BooksAuthors.Where(ba => ba.BookId == BookId).ToList();
-
-            foreach (var book in booksauthors)
-            {
-                _db.BooksAuthors.Remove(book);    
-            }
-            _db.SaveChanges();
-        }
-
-        public List<Book> GetBooks(List<Guid> booksListIds)
-        {
-            var booksList = new List<Book>();
-            foreach (var bookId in booksListIds)
-            {
-                booksList.Add(_db.Books.Where(b => b.Id == bookId).FirstOrDefault());
-            }
-            return booksList;
-        }
-
-        public List<Book> GetBooks(Guid PublisherId)
-        {
-
-            var booksList = _db.Books.Where(b => b.PublisherId == PublisherId).ToList();
-
-            return booksList;
         }
     }
 }

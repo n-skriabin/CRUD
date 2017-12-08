@@ -1,7 +1,10 @@
-﻿using CRUD.Views;
+﻿using CRUD.Domain;
+using Dapper;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,69 +13,65 @@ namespace CRUD.DataAccess.Repositories
 {
     public class AuthorRepository
     {
-        private ContextModel _db;
+        private IDbConnection _db;
 
-        public AuthorRepository(string ConnectionString)
+        public AuthorRepository(string connectionString)
         {
-            _db = new ContextModel(ConnectionString);
-        }
-
-        public void Create(Author author)
-        {
-            _db.Authors.Add(author);
-            _db.SaveChanges();
+            _db = new SqlConnection(connectionString);
         }
 
         public List<Author> Read()
         {
-            return _db.Authors.ToList();
+            var authors = _db.Query<Author>("SELECT * FROM Authors").ToList();
+            return authors;
+        }
+
+        public void Create(Author author)
+        {
+
+            _db.Query<Author>("INSERT INTO Authors (Id, FirstName, LastName, Patronymic, Abbreviated) VALUES(@Id, @FirstName, @LastName, @Patronymic, @Abbreviated);", author);
         }
 
         public void Delete(Guid AuthorId)
         {
-            var articles = _db.Articles.Where(a => a.AuthorId == AuthorId).ToList();
-            var booksauthors = _db.BooksAuthors.Where(ba => ba.AuthorId == AuthorId).ToList();
-            var booksAuthorsList = _db.BooksAuthors.Where(ba => ba.AuthorId == AuthorId).ToList();
+            var deletingAuthorBooks = _db.Query<BooksAuthors>("SELECT * FROM BooksAuthors WHERE AuthorId = @AuthorId", new { AuthorId });
+            _db.Query("DELETE FROM BooksAuthors WHERE AuthorId = @AuthorId", new { AuthorId });
 
-            foreach (var article in articles)
+            foreach (var bookAuthor in deletingAuthorBooks)
             {
-                _db.Articles.Remove(article);
+                var list = _db.Query<BooksAuthors>("SELECT * FROM BooksAuthors WHERE BookId = '" + bookAuthor.BookId + "'").ToList();
+
+                if (list.Count == 0) {
+                    _db.Query("DELETE FROM Books WHERE Id = '" + bookAuthor.BookId + "'");
+                }
             }
 
-            foreach (var bookauthor in booksauthors)
-            {
-                var recordForDelete = _db.Books.Where(b => b.Id == bookauthor.BookId).FirstOrDefault();
-                _db.BooksAuthors.Remove(bookauthor);               
-            }
-
-            var recordAuthorForDelete = _db.Authors.Where(a => a.Id == AuthorId).FirstOrDefault();
-            _db.Authors.Remove(recordAuthorForDelete);
-            _db.SaveChanges();
+            _db.Query("DELETE FROM Authors WHERE Id = @AuthorId", new { AuthorId });
+            _db.Query("DELETE FROM Articles WHERE AuthorId = @AuthorId", new { AuthorId });
         }
 
         public void Update(Author newRecord)
         {
-            _db.Entry(newRecord).State = EntityState.Modified;
-            _db.SaveChanges();
+            _db.Execute("UPDATE Authors SET FirstName = @FirstName, LastName = @LastName, Patronymic = @Patronymic WHERE Id = @Id", newRecord);
         }
 
         public Author GetAuthor(Guid AuthorId)
         {
-            var author = _db.Authors.Where(a => a.Id == AuthorId).FirstOrDefault();
+            var author = _db.Query<Author>("SELECT * FROM Authors WHERE Id = @AuthorId", new { AuthorId }).FirstOrDefault();
             return author;
         }
 
         public List<Author> GetAuthors(Guid bookId)
         {
-            var authors = new List<Author>();
-            var authorbookIds = _db.BooksAuthors.Where(ba => ba.BookId == bookId).ToList();
+            var authorIds = _db.Query<BooksAuthors>("SELECT * FROM BooksAuthors WHERE BookId = @bookId", new { bookId }).ToArray();
 
-            foreach (var authorbook in authorbookIds)
+            List<string> authorId = new List<string>();
+            foreach(var item in authorIds)
             {
-                var author = _db.Authors.Where(a => a.Id == authorbook.AuthorId).FirstOrDefault();
-                authors.Add(author);
+                authorId.Add(item.AuthorId.ToString());
             }
-            return authors;
+            var authors = _db.Query<Author>("SELECT * FROM Authors WHERE Id IN @authorId", new { authorId });
+            return authors.ToList();
         }
     }
 }
